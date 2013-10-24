@@ -6,11 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
@@ -18,12 +17,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
+import android.widget.ExpandableListView.OnChildClickListener;
 
-import com.example.listexample.lessons.*;
-
-public class ExpandableListAdapter extends BaseExpandableListAdapter
+public class ExpandableListAdapter extends BaseExpandableListAdapter implements OnChildClickListener
 {
+	private static final String packageName = "com.example.listexample";
     private static final String TAG = "TAG";
 	private Activity context;
     private Map<String, List<String>> lessonCollections;
@@ -32,7 +32,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter
     public ExpandableListAdapter(Activity context)
     {
     	this.context = context;
-    	InitializeLists();
+    	InitializeLessons();
     }
 	@Override
 	public Object getChild(int groupPosition, int childPosition) {
@@ -48,7 +48,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter
 	public View getChildView(int groupPosition, int childPosition,
 			boolean isLastChild, View convertView, ViewGroup parent) {
 		
-		final String laptop = (String) getChild(groupPosition, childPosition);
+		String topic = (String) getChild(groupPosition, childPosition);
         LayoutInflater inflater = context.getLayoutInflater();
  
         if (convertView == null) {
@@ -57,7 +57,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter
  
         TextView item = (TextView) convertView.findViewById(R.id.topic);
         
-        item.setText(laptop);
+        item.setText(topic);
         return convertView;
 	}
 
@@ -106,46 +106,70 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter
 		return true;
 	}
 	
-	private void InitializeLists()
+	private void InitializeLessons()
 	{
-		Intent i = new Intent("com.example.listexample.lessons.Topic1");
-		context.startActivity(i);
-		/*
-	    i.addCategory(Intent.CATEGORY_LAUNCHER);
-	    PackageManager pm = context.getPackageManager();
-
-	    List<PackageInfo> packages = pm.getInstalledPackages(pm.GET_ACTIVITIES);
-
-	    for (PackageInfo packageInfo : packages) {
-	        Log.d(TAG, "Installed package  :" + packageInfo.packageName);
-	        //Log.d(TAG, "Launch Activity :" + pm.getLaunchIntentForPackage(packageInfo.packageName)); 
-	    }
-	    
-	    PackageInfo info;
-		try {
-			info = pm.getPackageInfo("com.example.listexample.lessons", PackageManager.GET_ACTIVITIES);
-		    ApplicationInfo test = info.applicationInfo;
-		    ActivityInfo[] list = info.activities;
-		    Log.d(TAG, test.toString());
-		    Log.d(TAG, list.toString());
-		} catch (NameNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	    
 		lessons = new ArrayList<String>();
-		lessons.add("Lesson 1");
-		//lessons.add("Lesson 3");
-		
 		lessonCollections = new HashMap<String, List<String>>();
 		
-		List childList = new ArrayList<String>();
-		childList.add("Topic 1");
-		childList.add("Topic 2");
-		childList.add("Topic 3");
-		
-		lessonCollections.put("Lesson 1", childList);*/
+	    PackageManager pm = context.getPackageManager();
+	    ActivityInfo[] activities;
+		try {
+			activities = pm.getPackageInfo(packageName, pm.GET_ACTIVITIES).activities;
+			if (activities != null) {
+				for (ActivityInfo activityInfo : activities) {
+					//Log.d(TAG, "activityInfo.packageName : " + activityInfo.packageName);
+				    //Log.d(TAG, "activityInfo.name: " + activityInfo.name); 
+				    
+				    String activityName = activityInfo.name;
+				    ParseActivityName(activityName);
+
+				}
+			} 
+		} catch (NameNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
+	
+	private void ParseActivityName(String activityName){
+	    int startInd = activityName.indexOf("lesson");
+	    int endInd = activityName.indexOf("Topic");
+	    
+	    if(startInd > 0)
+	    {
+	    	String lesson = activityName.substring(startInd, endInd-1);
+	    	String topic = activityName.substring(endInd);
+			Log.d(TAG, "Lesson: " + lesson);
+		    Log.d(TAG, "Topic: " + topic); 
+	    	if(!lessonCollections.containsKey(lesson)) //Lesson doesn't exist. Add new
+	    	{
+	    		List<String> childList = new ArrayList<String>();
+	    		childList.add(topic);
+	    		
+	    		lessons.add(lesson);
+	    		lessonCollections.put(lesson, childList);
+	    	}
+	    	else
+	    	{
+	    		List<String> childList = lessonCollections.get(lesson);
+	    		childList.add(topic);
+	    	}
+	    }
+	}
+	@Override
+	public boolean onChildClick(ExpandableListView parent, View v,
+			int groupPosition, int childPosition, long id) 
+	{
+		String topic = (String) getChild(groupPosition, childPosition);
+		String lessonName = (String) getGroup(groupPosition);
+		
+		String componentName = packageName + "." + lessonName + "." + topic;
+		Intent intent = new Intent();
+		intent.setComponent(new ComponentName(packageName, componentName));
+		context.startActivity(intent);
+		
+		return true;
+	}
+	
 	
 
 }

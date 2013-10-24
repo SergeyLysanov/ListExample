@@ -1,6 +1,8 @@
 package com.example.listexample;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.ExpandableListView;
 import android.app.Activity;
 
@@ -14,6 +16,6 @@ public class MainActivity extends Activity
         ExpandableListView listView = (ExpandableListView) findViewById(R.id.lessons_list);
         ExpandableListAdapter listAdapter = new ExpandableListAdapter(this);
         listView.setAdapter(listAdapter);
+        listView.setOnChildClickListener(listAdapter);
     }
-
 }
