@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -21,17 +23,18 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.ExpandableListView.OnChildClickListener;
 
-public class ExpandableListAdapter extends BaseExpandableListAdapter implements OnChildClickListener
-{
-	private static final String packageName = "com.example.listexample";
-    private static final String TAG = "TAG";
-	private Activity context;
+public class ExpandableListAdapter extends BaseExpandableListAdapter implements OnChildClickListener{
+	
+	private String packageName;
+	private Context context;
     private Map<String, List<String>> lessonCollections;
     private List<String> lessons;
 
-    public ExpandableListAdapter(Activity context){
+    public ExpandableListAdapter(Context context, Map<String, List<String>> lessonCollections, List<String> lessons){
     	this.context = context;
-    	initializeLessons();
+    	this.lessonCollections = lessonCollections;
+    	this.lessons = lessons;
+    	this.packageName =  context.getString(R.string.package_name);
     }
     
 	@Override
@@ -49,7 +52,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter implements 
 			boolean isLastChild, View convertView, ViewGroup parent) {
 		
 		String topic = (String) getChild(groupPosition, childPosition);
-        LayoutInflater inflater = context.getLayoutInflater();
+		LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
  
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.child_item, null);
@@ -106,58 +109,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter implements 
 		return true;
 	}
 	
-	private void initializeLessons(){
-		lessons = new ArrayList<String>();
-		lessonCollections = new HashMap<String, List<String>>();
-		
-	    PackageManager pm = context.getPackageManager();
-	    ActivityInfo[] activities;
-		try {
-			activities = pm.getPackageInfo(packageName, pm.GET_ACTIVITIES).activities;
-			if (activities != null) {
-				for (ActivityInfo activityInfo : activities) {
-					//Log.d(TAG, "activityInfo.packageName : " + activityInfo.packageName);
-				    Log.d(TAG, "activityInfo.name: " + activityInfo.name); 
-				    
-				    String activityName = activityInfo.name;
-				    parseActivityName(activityName);
-
-				}
-			} 
-		} catch (NameNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private void parseActivityName(String activityName){
-	    int startInd = activityName.indexOf("lesson");
-	    int endInd = activityName.indexOf("Topic");
-	    
-	    if(startInd > 0)
-	    {
-	    	String lesson = activityName.substring(startInd, endInd-1);
-	    	String topic = activityName.substring(endInd);
-			Log.d(TAG, "Lesson: " + lesson);
-		    Log.d(TAG, "Topic: " + topic); 
-	    	if(!lessonCollections.containsKey(lesson)) //Lesson doesn't exist. Add new
-	    	{
-	    		List<String> childList = new ArrayList<String>();
-	    		childList.add(topic);
-	    		
-	    		lessons.add(lesson);
-	    		lessonCollections.put(lesson, childList);
-	    	}
-	    	else
-	    	{
-	    		List<String> childList = lessonCollections.get(lesson);
-	    		childList.add(topic);
-	    	}
-	    }
-	}
 	@Override
 	public boolean onChildClick(ExpandableListView parent, View v,
-			int groupPosition, int childPosition, long id) 
-	{
+			int groupPosition, int childPosition, long id) {
 		String topic = (String) getChild(groupPosition, childPosition);
 		String lessonName = (String) getGroup(groupPosition);
 		
@@ -168,7 +122,4 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter implements 
 		
 		return true;
 	}
-	
-	
-
 }
