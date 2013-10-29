@@ -29,11 +29,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter implements 
     private Map<String, List<String>> lessonCollections;
     private List<String> lessons;
 
-    public ExpandableListAdapter(Activity context)
-    {
+    public ExpandableListAdapter(Activity context){
     	this.context = context;
-    	InitializeLessons();
+    	initializeLessons();
     }
+    
 	@Override
 	public Object getChild(int groupPosition, int childPosition) {
 		return lessonCollections.get(lessons.get(groupPosition)).get(childPosition);
@@ -106,8 +106,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter implements 
 		return true;
 	}
 	
-	private void InitializeLessons()
-	{
+	private void initializeLessons(){
 		lessons = new ArrayList<String>();
 		lessonCollections = new HashMap<String, List<String>>();
 		
@@ -118,10 +117,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter implements 
 			if (activities != null) {
 				for (ActivityInfo activityInfo : activities) {
 					//Log.d(TAG, "activityInfo.packageName : " + activityInfo.packageName);
-				    //Log.d(TAG, "activityInfo.name: " + activityInfo.name); 
+				    Log.d(TAG, "activityInfo.name: " + activityInfo.name); 
 				    
 				    String activityName = activityInfo.name;
-				    ParseActivityName(activityName);
+				    parseActivityName(activityName);
 
 				}
 			} 
@@ -130,7 +129,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter implements 
 		}
 	}
 	
-	private void ParseActivityName(String activityName){
+	private void parseActivityName(String activityName){
 	    int startInd = activityName.indexOf("lesson");
 	    int endInd = activityName.indexOf("Topic");
 	    
