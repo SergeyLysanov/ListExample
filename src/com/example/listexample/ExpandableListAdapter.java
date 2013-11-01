@@ -1,31 +1,18 @@
 package com.example.listexample;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.ExpandableListView;
 import android.widget.TextView;
-import android.widget.ExpandableListView.OnChildClickListener;
 
-public class ExpandableListAdapter extends BaseExpandableListAdapter implements OnChildClickListener{
+public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	
-	private String packageName;
 	private Context context;
     private Map<String, List<String>> lessonCollections;
     private List<String> lessons;
@@ -34,7 +21,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter implements 
     	this.context = context;
     	this.lessonCollections = lessonCollections;
     	this.lessons = lessons;
-    	this.packageName =  context.getString(R.string.package_name);
     }
     
 	@Override
@@ -106,20 +92,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter implements 
 
 	@Override
 	public boolean isChildSelectable(int groupPosition, int childPosition) {
-		return true;
-	}
-	
-	@Override
-	public boolean onChildClick(ExpandableListView parent, View v,
-			int groupPosition, int childPosition, long id) {
-		String topic = (String) getChild(groupPosition, childPosition);
-		String lessonName = (String) getGroup(groupPosition);
-		
-		String componentName = packageName + "." + lessonName + "." + topic;
-		Intent intent = new Intent();
-		intent.setComponent(new ComponentName(packageName, componentName));
-		context.startActivity(intent);
-		
 		return true;
 	}
 }
